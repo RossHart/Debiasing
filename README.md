@@ -9,4 +9,4 @@ You need the file 'full sample.fits' from my dropbox (you may have to email me s
 
 3. Use 'Recover_full_data.ipynb' to add the debiased values to the end of the full_sample.fits
 
-*Plotting codes (a little sporadic at the moment) are all in the 'Plotting_codes' notebook.
+*Plotting codes (a little sporadic at the moment) are all in the 'Plotting_codes' folder.
