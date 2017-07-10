@@ -1,5 +1,5 @@
-source_directory = '../fits/'
-full_sample = 'full_sample.fits'
+source_directory = 'GAMA_fits/'
+full_sample = 'gama09.fits'
 
 question_dictionary = 'questions.pickle'
 

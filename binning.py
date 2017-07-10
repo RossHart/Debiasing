@@ -189,7 +189,7 @@ def redshift_assignment(data,vbins,zbin_ranges):
 def bin_data(data,full_data,question,answer,n_vbins=30,signal=50):
     ''' This function applies all of the binning (voronoi and then redshift):'''
   
-    raw_column = data[question + '_' + answer + '_weighted_fraction']
+    raw_column = data[question + '_' + answer]
     fv_nonzero = raw_column > 0 # Select only the non-zero data to add to the 
     # 'signal' for each bin.
     R50 = data['PETROR50_R_KPC'][fv_nonzero]

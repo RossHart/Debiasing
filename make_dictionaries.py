@@ -64,18 +64,6 @@ function_dictionary['label'] = {0: 'logistic',
 '''Make a dictionary of questions, answers, and which questions precede others
 '''
 
-# List of questions in order:
-q = ['t01_smooth_or_features'
-     ,'t02_edgeon'
-     ,'t03_bar'
-     ,'t04_spiral'
-     ,'t05_bulge_prominence'
-     ,'t06_odd'
-     ,'t07_rounded'
-     ,'t08_odd_feature'
-     ,'t09_bulge_shape'
-     ,'t10_arms_winding'
-     ,'t11_arms_number']
 
 # Labels for each of the questions (for plotting):
 label_q = ['Smooth or features'
@@ -90,18 +78,29 @@ label_q = ['Smooth or features'
      ,'Arm winding'
      ,'Arm number']
 
+
+# List of questions in order:
+q = ['shape',
+     'disk',
+     'bar',
+     'spiral_a',
+     'bulge_a',
+     'round',
+     'bulge_b',
+     'spiral_b',
+     'spiral_c']
+
 # Answers for each of the questions in turn:
-a = [['a01_smooth','a02_features_or_disk','a03_star_or_artifact']
-     ,['a04_yes','a05_no']
-     ,['a06_bar','a07_no_bar']
-     ,['a08_spiral','a09_no_spiral']
-     ,['a10_no_bulge','a11_just_noticeable','a12_obvious','a13_dominant']
-     ,['a14_yes','a15_no']
-     ,['a16_completely_round','a17_in_between','a18_cigar_shaped']
-     ,['a19_ring','a20_lens_or_arc','a21_disturbed','a22_irregular','a23_other','a24_merger','a38_dust_lane']
-     ,['a25_rounded','a26_boxy','a27_no_bulge']
-     ,['a28_tight','a29_medium','a30_loose']
-     ,['a31_1','a32_2','a33_3','a34_4','a36_more_than_4','a37_cant_tell']]
+a = [['smooth','features','star_or_artifact']
+     ,['yes','no']
+     ,['bar','no_bar']
+     ,['spiral','no_spiral']
+     ,['no_bulge','obvious','dominant']
+     ,['completely_round','in_between','cigar_shaped']
+     ,['rounded','boxy','no_bulge']
+     ,['tight','medium','loose']
+     ,['1','2','3','4','more_than_4']
+     ]
 
 # Answer labels (for plotting):
 label_a = [['Smooth','Features','Artifact']
@@ -122,9 +121,7 @@ pre_q = [None
          ,[0,1]
          ,[0,1]
          ,[0,1]
-         ,None
-         ,[0]
-         ,[5]
+         ,[0,1]
          ,[0,1]
          ,[0,1,3]
          ,[0,1,3]]
@@ -135,12 +132,11 @@ pre_a = [None
          ,[1,1]
          ,[1,1]
          ,[1,1]
-         ,None
-         ,[0]
-         ,[0]
+         ,[1,1]
          ,[1,1]
          ,[1,1,0]
          ,[1,1,0]]
+
 
 #-------------------------------------------------------------------------------
 '''Put all of this together in a single dictionary called "questions" '''
