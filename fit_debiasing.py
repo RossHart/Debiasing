@@ -36,7 +36,7 @@ def get_best_function(data,vbins,zbins,function_dictionary
     ''' Choose the function that captures the overall best fit using "coarse" 
         bins'''
 
-    fv_all = np.sort(data[question + '_' + answer + '_weighted_fraction'])
+    fv_all = np.sort(data[question + '_' + answer + '_fraction'])
     fv_nonzero = fv_all != 0
     cf = np.linspace(0,1,len(fv_all))
     x,y = [np.log10(fv_all[fv_nonzero]),cf[fv_nonzero]] # x and y values are 
@@ -114,8 +114,8 @@ def fit_vbin_function(data, vbins, zbins, fit_setup,
     
     min_fv = 10**(min_log_fv)
     
-    redshift = data['REDSHIFT_1'] # redshifts
-    fv = question + '_' + answer +'_weighted_fraction' # raw column name.
+    redshift = data['Z_TONRY'] # redshifts
+    fv = question + '_' + answer + '_fraction'# raw column name.
     
     if kc_fit_results is not None:
         kcfunc, kparams, cparams, lparams,kclabel = kc_fit_results
@@ -142,44 +142,52 @@ def fit_vbin_function(data, vbins, zbins, fit_setup,
         data_v = data[vselect]
         zbins_v = zbins[vselect]
         zbins_unique = np.unique(zbins_v)
-
         for z in zbins_unique:
             data_z = data_v[zbins_v == z]
             n = len(data_z)
-            
+            #print(D[fv])
             D = data_z[[fv]]
             D.sort(fv)
             D['cumfrac'] = np.linspace(0, 1, n)
-            D = D[D[fv] > min_fv]
-            D['log10fv'] = np.log10(D[fv])
-            if even_sampling:
-	       # Evenly sample in log(fv):
-                D_fit_log10fv = np.log10(np.linspace(10**(min_log_fv), 1, 100))
-                D = D[(D['log10fv'] > min_log_fv)]
-                indices = np.searchsorted(D['log10fv'], D_fit_log10fv)
-                D_fit = D[indices.clip(0, len(D)-1)]
-            else:
-                D_fit = D[D['log10fv'] > min_log_fv]
+            if (D[fv] > 0).sum() > 0:
+                D = D[D[fv] > min_fv]
+                D['log10fv'] = np.log10(D[fv])
+            
+                if even_sampling:
+            # Evenly sample in log(fv):
+                    D_fit_log10fv = np.log10(np.linspace(10**(min_log_fv), 1, 100))
+                    D = D[(D['log10fv'] > min_log_fv)]
+                    indices = np.searchsorted(D['log10fv'], D_fit_log10fv)
+                    D_fit = D[indices.clip(0, len(D)-1)]
+                else:
+                    D_fit = D[D['log10fv'] > min_log_fv]
 
-            res = minimize(chisq_fun, p0,
+                res = minimize(chisq_fun, p0,
                            args=(func,
                                  D_fit['log10fv'].astype(np.float64),
                                  D_fit['cumfrac'].astype(np.float64)),
                                  bounds=bounds, method='SLSQP')
-            p = res.x # Best fit
-            chi2nu = res.fun / (n - len(p)) 
             
-            if res.success == False:
-               print('Fit not found for z={},v={}'.format(z,v))
+                p = res.x # Best fit
+                chi2nu = res.fun / (n - len(p)) 
+            
+            #if (v == 1) & (z == 2):
+                #plt.plot(D_fit['log10fv'].astype(np.float64),
+                         #D_fit['cumfrac'].astype(np.float64),lw=3,color='k')
+                #x_guide = np.linspace(-2,0,100)
+                #plt.plot(x_guide,func(x_guide,*p),color='g',lw=2)
+            
+                if res.success == False:
+                    print('Fit not found for z={},v={}'.format(z,v))
                 
-            means = [data_z['PETROMAG_MR'].mean(),
-                     np.log10(data_z['PETROR50_R_KPC']).mean(),
-                     data_z['REDSHIFT_1'].mean()] # Mean values for each bin.
+                means = [data_z['absmag_r_stars'].mean(),
+                         np.log10(data_z['GALRE_r_kpc']).mean(),
+                         data_z['Z_TONRY'].mean()] # Mean values for each bin.
 
             #if len(p) < 2:
                 #p = np.array([p[0], 10])
 
-            param_data.append([v,z] + means + p.tolist() + [chi2nu]) # Make
+                param_data.append([v,z] + means + p.tolist() + [chi2nu]) # Make
             # final table.                         
             
     fit_vbin_results = Table(rows=param_data,
@@ -250,7 +258,7 @@ def fit_mrz(d, f_k, f_c, clip=None):
     
     bins = np.linspace(-3,3,15) 
     
-    # Remove the 'bad' fits, and then redo the fitting:
+    # Remove the +-2sigma fits, and then redo the fitting:
     if clip != None:
         clipped = ((np.absolute(knormres) < clip) & (np.absolute(cnormres) < clip))# 'clip' sigma clipping
         kp, kc = curve_fit(f_k, ((x_good.T)[clipped]).T, k[clipped], maxfev=100000)
@@ -312,7 +320,7 @@ def get_kc_functions(fit_vbin_results):
     finite_select = ((np.isfinite(fit_vbin_results['k'])) & 
                      (np.isfinite(fit_vbin_results['c'])))
     fit_vbin_results_finite = fit_vbin_results[finite_select] 
-    
+    fit_vbin_results.write('vbin_results.fits',overwrite=True)
     # Find the best functions for fitting the data:
     for M_dependence in M_ds:
         for R_dependence in R_ds:
@@ -371,7 +379,7 @@ def debias(data, z_base, k_func,c_func, kparams, cparams,
            question,answer,kmin,kmax,cmin,cmax,fit_setup):
     ''' Given a functional form, now debias all of the data'''
     
-    fv_col = question + '_' + answer + '_weighted_fraction'
+    fv_col = question + '_' + answer + '_fraction'
     fv = data[fv_col]
     debiased = np.zeros(len(fv))
     fv_nonzero = fv > 0
@@ -381,9 +389,9 @@ def debias(data, z_base, k_func,c_func, kparams, cparams,
     bounds = fit_setup['bounds']
 
     d  = data[fv_nonzero] # Only keep the non-zero data   
-    x = np.array([d['PETROMAG_MR'],
-                 np.log10(d['PETROR50_R_KPC']),
-                 d['REDSHIFT_1']], np.float64) # Parameter array.
+    x = np.array([d['absmag_r_stars'],
+                 np.log10(d['GALRE_r_kpc']),
+                 d['Z_TONRY']], np.float64) # Parameter array.
     xb  = x.copy()
     xb[-1] = z_base # Low redshift equivalent of the parameter array.
         

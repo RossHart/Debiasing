@@ -96,7 +96,7 @@ def redshift_binning(data,voronoi_bins,min_gals=100,coarse=False):
     ''' Bin each of the voronoi bins in terms in to bins of equal sample sizes, 
         each with >=min_gals galaxies'''
     
-    redshift = data['REDSHIFT_1']
+    redshift = data['Z_TONRY']
     z_bins = []
 
     for N in np.unique(voronoi_bins):
@@ -132,8 +132,8 @@ def voronoi_assignment(data, rect_bins_table, rect_vbins_table,
     n_Mr_bins = len(Mr_bin_edges) - 1
     
     # Load R50, Mr data for each galaxy:
-    R50 = np.log10(data['PETROR50_R_KPC'])
-    Mr = data['PETROMAG_MR']
+    R50 = np.log10(data['GALRE_r_kpc'])
+    Mr = data['absmag_r_stars']
     
     # Get the R50 and Mr bin for each galaxy in the sample
     R50_bins = np.digitize(R50, bins=R50_bin_edges).clip(1, n_R50_bins)
@@ -146,9 +146,9 @@ def voronoi_assignment(data, rect_bins_table, rect_vbins_table,
     # get the voronoi bin for each galaxy in the sample
     rect_bin_vbins = rect_vbins_table['vbin']
     voronoi_bins = rect_bin_vbins[rect_bins]
-    
-    if reassign is True: # Find nearest bin if none are available: 
-        rect_bins_assigned = rect_vbins_table[rect_vbins_table['vbin'] != -1]
+ 
+    def reassign(rect_vbins_table,voronoi_bins):
+        rect_bins_assigned = rect_vbins_table[voronoi_bins != -1]
         R50_bin = rect_bins_assigned['R50']
         Mr_bin = rect_bins_assigned['Mr']
         
@@ -167,7 +167,18 @@ def voronoi_assignment(data, rect_bins_table, rect_vbins_table,
         i = i.squeeze()
         vbins_reassigned = rect_bins_assigned['vbin'][i]
         voronoi_bins[voronoi_bins == -1] = vbins_reassigned
-    
+        return rect_vbins_table, voronoi_bins
+    if reassign is True: # Find nearest bin if none are available:
+        rect_vbins_table, voronoi_bins = reassign(rect_vbins_table,voronoi_bins)
+        
+    #for v in np.unique(voronoi_bins):
+        #in_v = voronoi_bins == v
+        #if in_v.sum() <= 100:
+            #voronoi_bins[in_v] = -1
+    #print((voronoi_bins == -1).sum())
+    #if reassign is True:
+    #    rect_vbins_table, voronoi_bins = reassign(rect_vbins_table,voronoi_bins)
+    #print((voronoi_bins == -1).sum())
     return voronoi_bins
   
   
@@ -179,21 +190,21 @@ def redshift_assignment(data,vbins,zbin_ranges):
     
     for v in (np.unique(vbins)):
         z_range = zbin_ranges[v]
-        v_data = data[vbins == v]['REDSHIFT_1']
+        v_data = data[vbins == v]['Z_TONRY']
         z_bin = np.digitize(v_data,bins=z_range)
         zbins[vbins == v] = z_bin
         
     return zbins
   
   
-def bin_data(data,full_data,question,answer,n_vbins=30,signal=50):
+def bin_data(data,full_data,question,answer,n_vbins=20,signal=50):
     ''' This function applies all of the binning (voronoi and then redshift):'''
   
-    raw_column = data[question + '_' + answer]
+    raw_column = data[question + '_' + answer + '_fraction']
     fv_nonzero = raw_column > 0 # Select only the non-zero data to add to the 
     # 'signal' for each bin.
-    R50 = data['PETROR50_R_KPC'][fv_nonzero]
-    Mr = data['PETROMAG_MR'][fv_nonzero]
+    R50 = data['GALRE_r_kpc'][fv_nonzero]
+    Mr = data['absmag_r_stars'][fv_nonzero]
     
     npv = np.sum(fv_nonzero)/(n_vbins) # Number of galaxies in each voronoi bin.
     nrb = math.floor(np.sqrt(np.sum(fv_nonzero))) # If we have too many
