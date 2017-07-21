@@ -63,7 +63,7 @@ def get_best_function(data,vbins,zbins,function_dictionary
         res =  minimize(chisq_fun, p0,
                         args=(func,x_fit,y_fit),
                         bounds=bounds,method='SLSQP')
-        function_dictionary['p0'][key] = res.x # Best fit value
+        function_dictionary['p0'][key] = x # Best fit value
         
         if res.success == False:
             # Try again if no fit was found:
