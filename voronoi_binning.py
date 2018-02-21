@@ -104,8 +104,8 @@ def voronoi_binning(R50, Mr, n_rect_bins=500, n_per_voronoi_bin=5000,save=True):
     # the voronoi bin indices and counts
     rect_bin_voronoi_bin = np.zeros(np.product(rect_bin_val.shape), np.int) - 1
     rect_bin_voronoi_bin[ok_bin] = binNum
-    rect_bin_count = np.zeros_like(rect_bin_voronoi_bin)
-    rect_bin_count[ok_bin] = count
+    #rect_bin_count = np.zeros_like(rect_bin_voronoi_bin)
+    #rect_bin_count[ok_bin] = count
     
     rect_vbins_table = Table(data=[R50_bin_coords, Mr_bin_coords,
                              rect_bin_voronoi_bin],

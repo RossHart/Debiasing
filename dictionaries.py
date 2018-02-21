@@ -66,35 +66,31 @@ function_dictionary['label'] = {0: 'logistic',
 '''Make a dictionary of questions, answers, and which questions precede others
 '''
 
-
 # Labels for each of the questions (for plotting):
-label_q = ('Smooth or features',
+label_q = ['Smooth or features',
            'Edge on',
            'Bar',
            'Spiral',
            'Bulge prominence',
-           'Anything odd',
            'Roundedness',
-           'Odd features',
            'Bulge shape',
            'Arm winding',
-           'Arm number')
+           'Arm number']
 
 
 # List of questions in order:
-q = ('shape',
-     'disk',
+q = ['features',
+     'edgeon',
      'bar',
-     'spiral_a',
-     'bulge_a',
+     'spiral',
+     'bulge',
      'round',
-     'bulge_b',
-     'spiral_b',
-     'spiral_c',
-     'odd')
+     'bulgeshape',
+     'spiralwinding',
+     'spiralnumber']
 
 # Answers for each of the questions in turn:
-a = (['smooth','features','star_or_artifact'],
+a = [['smooth','features','star_or_artifact'],
      ['yes','no'],
      ['bar','no_bar'],
      ['spiral','no_spiral'],
@@ -103,46 +99,40 @@ a = (['smooth','features','star_or_artifact'],
      ['rounded','boxy','no_bulge'],
      ['tight','medium','loose'],
      ['1','2','3','4','more_than_4'],
-     ['ring','lens_or_arc','irregular','other','dust_lane','overlapping']
-     )
+     ]
 
 # Answer labels (for plotting):
-label_a = (['Smooth','Features','Artifact'],
+label_a = [['Smooth','Features','Artifact'],
            ['Yes','No'],
            ['Yes','No'],
            ['Yes','No'],
-           ['None','Obvious','Dominant'],
+           ['None','Noticeable','Obvious','Dominant'],
            ['Round','In between','Cigar shaped'],
            ['Rounded','Boxy','None'],
            ['Tight','Medium','Loose'],
-           ['1','2','3','4','5+','??'],
-           ['Ring','Lens/Arc','Disturbed','Irregular','Other','Merger','Dust lane']
-           )
+           ['1','2','3','4','5+','??']]
 
 # 'Previously answered questions' for each question in turn:
-pre_q = (None,
-         [0],
-         [0,1],
-         [0,1],
-         [0,1],
-         [0,1],
-         [0,1],
-         [0,1,3],
-         [0,1,3],
-         None)
+pre_q = [None
+         ,[0]
+         ,[0,1]
+         ,[0,1]
+         ,[0,1]
+         ,[0,1]
+         ,[0,1]
+         ,[0,1,3]
+         ,[0,1,3]]
 
 # Required answers for each previously answered question:
-pre_a = (None,
-         [1],
-         [1,1],
-         [1,1],
-         [1,1],
-         [1,1],
-         [1,1],
-         [1,1,0],
-         [1,1,0],
-         None)
-
+pre_a = [None
+         ,[1]
+         ,[1,1]
+         ,[1,1]
+         ,[1,1]
+         ,[1,1]
+         ,[1,1]
+         ,[1,1,0]
+         ,[1,1,0]]
 
 #-------------------------------------------------------------------------------
 '''Put all of this together in a single dictionary called "questions" '''

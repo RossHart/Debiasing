@@ -66,54 +66,50 @@ function_dictionary['label'] = {0: 'logistic',
 
 
 # Labels for each of the questions (for plotting):
-label_q = ['Smooth or features'
-     ,'Edge on'
-     ,'Bar'
-     ,'Spiral'
-     ,'Bulge prominence'
-     ,'Anything odd'
-     ,'Roundedness'
-     ,'Odd features'
-     ,'Bulge shape'
-     ,'Arm winding'
-     ,'Arm number']
+label_q = ['Smooth or features',
+           'Edge on',
+           'Bar',
+           'Spiral',
+           'Bulge prominence',
+           'Roundedness',
+           'Bulge shape',
+           'Arm winding',
+           'Arm number']
 
 
 # List of questions in order:
-q = ['shape',
-     'disk',
+q = ['features',
+     'edgeon',
      'bar',
-     'spiral_a',
-     'bulge_a',
+     'spiral',
+     'bulge',
      'round',
-     'bulge_b',
-     'spiral_b',
-     'spiral_c']
+     'bulgeshape',
+     'spiralwinding',
+     'spiralnumber']
 
 # Answers for each of the questions in turn:
-a = [['smooth','features','star_or_artifact']
-     ,['yes','no']
-     ,['bar','no_bar']
-     ,['spiral','no_spiral']
-     ,['no_bulge','obvious','dominant']
-     ,['completely_round','in_between','cigar_shaped']
-     ,['rounded','boxy','no_bulge']
-     ,['tight','medium','loose']
-     ,['1','2','3','4','more_than_4']
+a = [['smooth','features','star_or_artifact'],
+     ['yes','no'],
+     ['bar','no_bar'],
+     ['spiral','no_spiral'],
+     ['no_bulge','obvious','dominant'],
+     ['completely_round','in_between','cigar_shaped'],
+     ['rounded','boxy','no_bulge'],
+     ['tight','medium','loose'],
+     ['1','2','3','4','more_than_4'],
      ]
 
 # Answer labels (for plotting):
-label_a = [['Smooth','Features','Artifact']
-     ,['Yes','No']
-     ,['Yes','No']
-     ,['Yes','No']
-     ,['None','Noticeable','Obvious','Dominant']
-     ,['Yes','No']
-     ,['Round','In between','Cigar shaped']
-     ,['Ring','Lens/Arc','Disturbed','Irregular','Other','Merger','Dust lane']
-     ,['Rounded','Boxy','None']
-     ,['Tight','Medium','Loose']
-     ,['1','2','3','4','5+','??']]
+label_a = [['Smooth','Features','Artifact'],
+           ['Yes','No'],
+           ['Yes','No'],
+           ['Yes','No'],
+           ['None','Noticeable','Obvious','Dominant'],
+           ['Round','In between','Cigar shaped'],
+           ['Rounded','Boxy','None'],
+           ['Tight','Medium','Loose'],
+           ['1','2','3','4','5+','??']]
 
 # 'Previously answered questions' for each question in turn:
 pre_q = [None

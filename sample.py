@@ -1,5 +1,5 @@
 from astropy.table import Table, column
-#from luminosities_magnitudes_and_distances import mag_to_Mag
+from luminosities_magnitudes_and_distances import mag_to_Mag
 import dictionaries
 import math
 import numpy as np
@@ -26,34 +26,59 @@ class Sample():
             p_col = np.ones(len(full_data))
             for q, a in zip(previous_q, previous_a):
                 p_col = p_col*(full_data[q + '_' + a + suffix])
-            N_col = (full_data[q + '_' + a + params.count_suffix])
+            #N_col = (full_data[q + '_' + a + params.count_suffix])
+            N_col = full_data[question + params.count_suffix]
             select = (p_col > p_cut) & (N_col >= N_cut)
             less_data = full_data[select]
             print('{}/{} galaxies with p>{} and N>={}.'.format(len(less_data),
-                                                               len(full_data),p_cut,N_cut))
+                                                               len(full_data),
+                                                                 p_cut,N_cut))
         else:
             less_data = full_data.copy()
             select = np.ones(len(full_data),dtype=np.bool)
-            print('Primary question, so all {} galaxies used.'.format(len(less_data)))
+            print('Primary question, so all {} galaxies used.'.format(
+            	                                              len(less_data)))
     
         self.all_data = full_data
         self.less_data = less_data
         self.params = params
         self.p_mask = select
         return None
-    
-    #def volume_limit(self):
-        #lower_z_limit, upper_z_limit = self.params.volume_redshift_limits
-        #mag_limit = self.params.survey_mag_limit
-        #Mag_limit = mag_to_Mag(19.4,upper_z_limit)
-        #in_volume_limit = np.all([self.all_data[self.params.z_column] >= lower_z_limit,
-                                  #self.all_data[self.params.z_column] <= upper_z_limit,
-                                  #self.all_data[self.params.Mr_column] <= Mag_limit],
-                                 #axis=0)
+
+    def volume_limited_sample(self):
+        lower_z_limit, upper_z_limit = self.params.volume_redshift_limits
+        mag_limit = self.params.survey_mag_limit
+        Mag_limit = mag_to_Mag(mag_limit,upper_z_limit)
+        in_vl = np.all([self.all_data[self.params.z_column] >= lower_z_limit,
+                        self.all_data[self.params.z_column] <= upper_z_limit,
+                        self.all_data[self.params.Mr_column] <= Mag_limit],
+                        axis=0)
         
-        #self.in_volume_limit = in_volume_limit
-        #self.Mag_limit = Mag_limit
-        #return None
+        self.in_volume_limit = in_vl
+        self.Mag_limit = Mag_limit
+        return in_vl
+
+    def z_slices(self):
+    	in_vl = self.volume_limited_sample()
+    	lower_z_limit, upper_z_limit = self.params.volume_redshift_limits
+    	
+    	low_z_limits = [lower_z_limit,
+    	                lower_z_limit+(upper_z_limit-lower_z_limit)/10]
+
+    	upper_z_limits =[upper_z_limit-(upper_z_limit-lower_z_limit)/10,
+    	                 upper_z_limit]
+
+    	in_low_z = np.all([self.all_data[self.params.z_column] 
+    		                                >= low_z_limits[0],
+    		               self.all_data[self.params.z_column] 
+    		                                <= low_z_limits[1]],axis=0)
+
+    	in_high_z = np.all([self.all_data[self.params.z_column] 
+    		                               >= upper_z_limits[0],
+    		                self.all_data[self.params.z_column] 
+    		                               <= upper_z_limits[1]],axis=0)
+
+    	return (in_vl*in_low_z).astype(bool), (in_vl*in_high_z).astype(bool)
 
 class Bins():
     def __init__(self,sample,params,questions,
@@ -90,7 +115,8 @@ class Bins():
         n_rect_bins = int(math.floor(n_rect_bins))
         n_per_voronoi_bin = n_gal/self.params.n_voronoi
         
-        rect_bin_val, R50_bin_edges, Mr_bin_edges = np.histogram2d(R50, Mr, n_rect_bins)
+        rect_bin_val, R50_bin_edges, Mr_bin_edges = np.histogram2d(R50, Mr, 
+        	                                                      n_rect_bins)
 
         rect_bins_table = Table(data=[R50_bin_edges, Mr_bin_edges],
                                 names=['R50_bin_edges', 'Mr_bin_edges'])
@@ -102,8 +128,10 @@ class Bins():
         n_Mr_bins = len(Mr_bin_centres)
 
         # Get ranges:
-        R50_bins_min, Mr_bins_min = map(np.min, (R50_bin_centres, Mr_bin_centres))
-        R50_bins_max, Mr_bins_max = map(np.max, (R50_bin_centres, Mr_bin_centres))
+        R50_bins_min, Mr_bins_min = map(np.min, (R50_bin_centres, 
+        	                                     Mr_bin_centres))
+        R50_bins_max, Mr_bins_max = map(np.max, (R50_bin_centres, 
+        	                                     Mr_bin_centres))
         R50_bins_range = R50_bins_max - R50_bins_min
         Mr_bins_range = Mr_bins_max - Mr_bins_min
     
@@ -147,8 +175,8 @@ class Bins():
         # the voronoi bin indices and counts
         rect_bin_voronoi_bin = (np.zeros(np.product(rect_bin_val.shape), np.int)- 1)
         rect_bin_voronoi_bin[ok_bin] = binNum
-        rect_bin_count = np.zeros_like(rect_bin_voronoi_bin)
-        rect_bin_count[ok_bin] = count
+        #rect_bin_count = np.zeros_like(rect_bin_voronoi_bin)
+        #rect_bin_count[ok_bin] = count
     
         rect_vbins_table = Table(data=[R50_bin_coords, Mr_bin_coords,
                                  rect_bin_voronoi_bin],
@@ -226,7 +254,7 @@ class Bins():
                               (Mr_all - Mr_bins_min) / Mr_bins_range]).T
                 nbrs = NearestNeighbors(n_neighbors=1).fit(xy[assigned])
                 d, i = nbrs.kneighbors(xy[assigned == False])
-                voronoi_bins[assigned == False] = voronoi_bins[assigned][i]
+                voronoi_bins[assigned == False] = voronoi_bins[assigned][i.squeeze()]
         
         self.voronoi_bins = voronoi_bins
         return None
@@ -244,7 +272,7 @@ class Bins():
         for v in np.unique(self.voronoi_bins):
             in_v = self.voronoi_bins == v
             in_p = self.sample.p_mask
-            in_q = self.sample.all_data[q + '_' + a + self.params.count_suffix] >= 1
+            in_q = self.sample.all_data[q + '_' + a + self.params.fraction_suffix] > 0
             in_vpq = np.all([in_v,in_p,in_q],axis=0)
             z_v = self.z_all[in_v]
             z_vpq = self.z_all[in_vpq]
